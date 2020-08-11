@@ -162,6 +162,19 @@ class ths_queapi:
             print(res1)
         return res1
 
+    def onefake_red_after_twored(self,timestamp = None,verbose =False):
+        td, ysd, two_dl, d_3, d_4, d_5, d_6, d_7, d_8, d_9, d_10, *rest = self.set_review_date(timestamp)
+        res1 = f"{two_dl}至{td}有大于2个阳线，" \
+            f"{td}跌幅大于1，" \
+            f"{two_dl}至{td}涨幅小于6，" \
+            f"{td}收盘价小于{ysd}开盘价，"
+
+        if verbose:
+            print(res1)
+        return res1
+
+
+
     def requests_selenium(self,query):
         """chromedrive """
         options = webdriver.ChromeOptions()
@@ -181,14 +194,16 @@ class ths_queapi:
             driver.quit()
         return tscode
 
+
     def ss(self,td,verbose = 0):
 
         stg = [
-                self.onefake_of_threereds,
-                self.jump_fall_suck,
-                self.lower_shadow_line,
-                self.five_reds_under_m20,
-
+                # self.tail_fall_but_money_in,
+                # self.onefake_of_threereds,
+                # self.jump_fall_suck,
+                # self.lower_shadow_line,
+                # self.five_reds_under_m20,
+                self.onefake_red_after_twored
 
 
                ]
