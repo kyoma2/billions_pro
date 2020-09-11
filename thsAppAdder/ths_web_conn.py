@@ -51,20 +51,21 @@ class ths_queapi:
             print(res1)
         return res1
 
-    def mid_fall_but_money_in(self,timestamp):
+    def mid_fall_but_money_in(self,timestamp,verbose=False):
         """每个小时区间跌幅但是资金流入,这种情况用于判断最后几天的洗盘"""
         td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,*rest = self.set_review_date(timestamp)
-        res1 = "{td}13点到14点跌幅大于1.5，" \
-               "({td}14点dde大单净额-{td}13点dde大单净额)>0," \
-               "{td}15点dde大单净额>0,{td}涨幅小于3," \
-               "{d_7}至{td}的区间涨跌幅>5%且{d_7}至{td}的区间涨跌幅<20%," \
-               "{td}涨幅小于3"
+        res1 = f"{td}13点到14点跌幅大于1.5，" \
+               f"({td}14点dde大单净额-{td}13点dde大单净额)>0," \
+               f"{td}15点dde大单净额>0,{td}涨幅小于3," \
+               f"{d_7}至{td}的区间涨跌幅>5%且{d_7}至{td}的区间涨跌幅<20%," \
+               f"{td}涨幅小于3"
 
-        res1= res1 + self.common
-        # print(res1.format(td = td,d_6= d_6,d_7=d_7))
+        res1 = res1 + self.common
+        if verbose:
+            print(res1)
+        return res1
 
 
-        return res1.format(td = td,d_6= d_6,d_7=d_7)
 
     def big_suck_not_leave(self,timestamp,verbose=False):
         """资金流入，成交量暴增，不能涨停，次日的成交量放缓，资金继续少量流入"""
@@ -173,6 +174,30 @@ class ths_queapi:
             print(res1)
         return res1
 
+    def a_little_minus_macd(self,timestamp = None,verbose =False):
+        td, ysd, two_dl, d_3, d_4, d_5, d_6, d_7, d_8, d_9, d_10, *rest = self.set_review_date(timestamp)
+        res1 = \
+            f"{d_4}至{td}有>=3次的macd小于0，" \
+            f"{d_4}macd大于0，" \
+            f"{td}macd大于0，" \
+            f"{two_dl}kdjj值大于0，"
+
+        if verbose:
+            print(res1)
+        return res1
+
+    def two_up_line(self,timestamp = None,verbose =False):
+        td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,d_9,d_10,*rest = self.set_review_date(timestamp)
+        """找上影线的"""
+        res1 = f"1.01<{td}收盘价/开盘价<1.03," \
+            f"{td}最高价/收盘价>1.04," \
+            f"1.01<{ysd}收盘价/开盘价<1.03," \
+            f"{ysd}最高价/收盘价>1.05," \
+
+        if verbose:
+            print(res1)
+        return res1
+
 
 
     def requests_selenium(self,query):
@@ -198,11 +223,14 @@ class ths_queapi:
     def ss(self,td,verbose = 0):
 
         stg = [
-                # self.tail_fall_but_money_in,
-                # self.onefake_of_threereds,
-                # self.jump_fall_suck,
-                # self.lower_shadow_line,
-                # self.five_reds_under_m20,
+                self.a_little_minus_macd,
+                self.two_up_line,
+                self.tail_fall_but_money_in,
+                self.mid_fall_but_money_in,
+                self.onefake_of_threereds,
+                self.jump_fall_suck,
+                self.lower_shadow_line,
+                self.five_reds_under_m20,
                 self.onefake_red_after_twored
 
 
@@ -269,7 +297,7 @@ class ths_queapi:
 
 a = ths_queapi()
 
-a.lots_of_work("8月10日",verbose=1)
+a.lots_of_work("9月10日",verbose=1)
 # a.lots_of_work("7月25日")
 # a.ss("6月11日")
 # driver = Chrome()
