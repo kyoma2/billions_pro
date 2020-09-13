@@ -249,19 +249,45 @@ class ths_queapi:
         return tscode
 
 
+    def two_up_line(self,timestamp = None,verbose =False):
+        td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,d_9,d_10,*rest = self.set_review_date(timestamp)
+        """找上影线的"""
+        res1 = f"1.01<{td}收盘价/开盘价<1.03," \
+            f"{td}最高价/收盘价>1.04," \
+            f"1.01<{ysd}收盘价/开盘价<1.03," \
+            f"{ysd}最高价/收盘价>1.05," \
+
+        if verbose:
+            print(res1)
+        return res1
+
+    def a_little_minus_macd(self,timestamp = None,verbose =False):
+        td, ysd, two_dl, d_3, d_4, d_5, d_6, d_7, d_8, d_9, d_10, *rest = self.set_review_date(timestamp)
+        res1 = \
+            f"{d_4}至{td}有>=3次的macd小于0，" \
+            f"{d_4}macd大于0，" \
+            f"{td}macd大于0，" \
+            f"{two_dl}kdjj值大于0，"
+
+        if verbose:
+            print(res1)
+        return res1
+
     def ss(self,td,verbose = 0,**kwargs):
 
         stg = [
 
-                # self.onefake_of_threereds,
-                # self.jump_fall_suck,
-                # self.lower_shadow_line,
-                # self.five_reds_under_m20,
-                # self.onefake_red_after_twored,
-                # self.quoter_fall_but_money_in,
-                # self.mid_fall_but_money_in,
-                # self.tail_fall_but_money_in
-                self.upper_shadow_line
+                self.onefake_of_threereds,
+                self.jump_fall_suck,
+                self.lower_shadow_line,
+                self.five_reds_under_m20,
+                self.onefake_red_after_twored,
+                self.quoter_fall_but_money_in,
+                self.mid_fall_but_money_in,
+                self.tail_fall_but_money_in,
+                self.upper_shadow_line,
+                self.two_up_line,
+                self.a_little_minus_macd
                ]
 
 
@@ -326,8 +352,7 @@ class ths_queapi:
 
 a = ths_queapi()
 
-# a.lots_of_work("9月10日",verbose=1,todayisfu = 0)
-a.lots_of_work("9月10日",verbose=1,todayisfu = 0)
+# a.lots_of_work("9月10日",verbose=1,todayisfu = 0) ots_of_work("9月10日",verbose=1,todayisfu = 0)
 # a.lots_of_work("7月25日")
 # a.ss("6月11日")
 # driver = Chrome()
