@@ -9,7 +9,7 @@ from conn.invate import *
 from logger import logman
 import time,conn
 import traceback
-from good_emp import good_emp
+# from good_emp import good_emp
 from functools import partial
 
 
@@ -164,9 +164,9 @@ class billions_pro:
         print(self.cur_timestp,score_df)
 
         return df
-
-    def good_emp(self):
-        return good_emp(self)
+    #
+    # def good_emp(self):
+    #     return good_emp(self)
 
 
     def lots_timestp_check(self,timestamp = "",days = 100,model = "prepared",**kwargs):
@@ -214,13 +214,13 @@ class billions_pro:
         class a:
                 pass
         class strategy_setter:
-
+            #
             # kongzhongjiayou = kongzhongjiayou_strategy(df)
-            gre_leg = masquerade(df,[
-                                     crossing_star(bodylen=0.5,leglen=2,color="gre",increase_per=(-10,-0.5)),
-
-
-            ])
+            # gre_leg = masquerade(df,[
+            #                          crossing_star(bodylen=0.5,leglen=2,color="gre",increase_per=(-10,-0.5)),
+            #
+            #
+            # ])
             # ma3_chase_ma2 = ma3_chase_ma2(df,self.cur_timestp)
             # #
             # quick_up_down_greleg = quick_up_down_greleg_strategy(df)
@@ -245,7 +245,7 @@ class billions_pro:
             #                              *[common()]*3,
             #                              (long_head(),closes())
             #                         ])
-            # reds_no_raise = reds_no_raise_strategy(df, self.cur_timestp)
+            reds_no_raise = reds_no_raise_stg(df, self.cur_timestp)
 
 
         self.combine_res([(strategy_setter.__dict__[i],i) if i  not in a.__dict__  else (None,"") for i in strategy_setter.__dict__])
