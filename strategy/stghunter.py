@@ -1,4 +1,3 @@
-
 from util.tools import *
 import numpy as np
 import sys
@@ -54,7 +53,7 @@ def decrease_deal(df,timestamp):
         return df.index.name
     return None
 
-def break_m3_strategy(df,timestamp):
+def break_m3_stg(df,timestamp):
     """触底20日线 不超过2天 现在涨幅没超过5%"""
 
     if df.empty:
@@ -91,7 +90,7 @@ def _kongzhongjianyou(df,days = 4):
     # print(days,cul_chg_steady,ma_m1_steady,res)
     return res and ma_m1_steady and cul_chg_steady
 
-def kongzhongjiayou_strategy(df):
+def kongzhongjiayou_stg(df):
 
     if df.empty:
         return None
@@ -102,7 +101,7 @@ def kongzhongjiayou_strategy(df):
     return None
 
 
-def last_clean_strategy(df):
+def last_clean_stg(df):
     if df.empty:
         return None
     # one = tail_is_increasing(df['volume_ratio'][-3:-1], ascending=True)
@@ -115,23 +114,7 @@ def last_clean_strategy(df):
     if two and three:
         return df['ts_code'][0]
 
-
-def ma3_chase_ma2(df,timestp):
-    df = select_df_by_timestamp(df,timestp)
-    if df.empty:
-        return None
-
-    one = is_ma_steady(df,'ma_m2')
-    two = is_ma_steady(df,'ma_m3')
-
-    four = all(map(lambda x,y: 1.01<x/y<1.06 ,df['ma_m2'] ,df['ma_m3']))
-    three = tail_is_increasing(df['ma_m3'],tail_length=6)
-
-    if one and two and three and four:
-        return df['ts_code'][0]
-
-
-def candle_break_m1_strategy(df):
+def candle_break_m1_stg(df):
 
     if df.empty:
         return None
@@ -145,7 +128,7 @@ def candle_break_m1_strategy(df):
         return df['ts_code'][0]
 
 
-def quick_up_down_greleg_strategy(df):
+def quick_up_down_greleg_stg(df):
 
     # if "603998" in df['ts_code'][0]:
         # print(df['vol'])
@@ -155,7 +138,7 @@ def quick_up_down_greleg_strategy(df):
     one = masquerade(df, [ common(increase_per=(-9, 8)),
                         common(increase_per=(9.7, 11)),
                             common(increase_per=(-10, -2),red=False),
-                          (common(increase_per=(-6, -2.5),jump=(-10,-1)),crossing_star(leglen=2,color="gre"))
+                          (common(increase_per=(-10, -3),jump=(-10,-1)),crossing_star(leglen=3,color="gre"))
                                     ])
 
     if len(df)>8:
@@ -166,27 +149,109 @@ def quick_up_down_greleg_strategy(df):
     if one and two :
         return df['ts_code'][0]
 
-def quick_up_down_strategy(df):
+def quick_up_down_stg(df):
 
     if df.empty:
         return None
     one = masquerade(df, [ common(increase_per=(-9, 8)),
                         common(increase_per=(9.7, 11)),
                            common(increase_per=(-10, -2), red=False),
-                          (common(increase_per=(-6, -2.5)),crossing_star(leglen=0.3,color="gre"))
+                          (common(increase_per=(-10, -3),jump=(-10,-1)),crossing_star(leglen=1,color="gre"))
                                     ])
-    # print(df[['jump_open']])
+    # print(df)
     if len(df)>8:
         two = df['vol'][-7:].max() < df['vol'].to_list()[-3]*1.2
     else:
         two = True
 
-    # print(one,two)
-
     if one and two :
         return df['ts_code'][0]
 
-def macd_zerozeroone_strategy(df,timestamp,days = 6):
+
+
+def two_head_air_clean_stg(df,days = 6):
+    # print(df[-20:])
+    one = masquerade(df[-20:],[
+                    [crossing_star(increase_per=(-1,10),shape="up",color='red'),field_pct_chg('high',percent=1)],
+                    [crossing_star(increase_per=(-1, 10), shape="up", color='red'),field_pct_chg('high',percent=2.5) ]
+    ])
+
+    five = masquerade(df[-20:],[
+                    [crossing_star(increase_per=(-1,10),shape="up",color='red') ,field_pct_chg('high',percent=2.5)],
+                    [crossing_star(increase_per=(-1, 10), shape="up", color='red') ,field_pct_chg('high',percent=1)]
+    ])
+    two = 20>sum(df['pct_chg'][-days:]) > 6.5
+    three = all(map(lambda x: x<9.8,df['pct_chg'][-days:]))
+    today_price = df['close'][-1]
+    four = today_price<20
+    # print(one,two,three,four)
+    if (one or five) and two and three and four :
+        return df['ts_code'][0]
+
+def one_head_air_clean_stg(df,days = 5):
+    # print(df[-20:])
+    one = masquerade(df[-20:],[
+
+                    [crossing_star(increase_per=(-1, 10), shape="up", color='red'),field_pct_chg('high',percent=2) ]
+    ])
+
+
+    two = 20>sum(df['pct_chg'][-days:]) > 6.5
+    three = all(map(lambda x: x<9.8,df['pct_chg'][-days:]))
+    today_price = df['close'][-1]
+    four = today_price < 20
+    # print(one,two,three,four)
+    if one  and two and three and four :
+        return df['ts_code'][0]
+
+
+
+def continuous_red_stg(df,days = 10):
+
+
+    one = sum(map(lambda x,y:x>=y,df['close'][-days:],df['open'][-days:]))>=days-4
+    two = 20>sum(df['pct_chg'][-days:]) > 6.5
+    three = all(map(lambda x: x<9.8,df['pct_chg'][-days:]))
+    today_price = df['close'][-1]
+    four = today_price<20
+    if one and two and three and four:
+        return df['ts_code'][0]
+
+def continuous_red_weekly_stg(df,days = 6):
+    ts_code = df['ts_code'][0]
+    df = df.resample("W")
+    df = df.agg({"pct_chg": lambda x: round(((x/100 + 1.0).prod() - 1.0),4)*100,
+           "open": lambda x: x[x.first_valid_index()] if x.first_valid_index() else np.nan,
+           "close": lambda x: x[x.last_valid_index()] if x.last_valid_index() else np.nan,
+           "high": lambda x: x.max(),
+           'low': lambda x: x.min()
+           })
+    df['ts_code'] = ts_code
+    # print(df)
+    one = sum(map(lambda x,y:x>=y,df['close'][-days:],df['open'][-days:]))>=days-1
+    two = 25>sum(df['pct_chg'][-days:]) > 9
+    three = all(map(lambda x: x<20,df['pct_chg'][-days:]))
+    today_price = df['close'][-1]
+    four = today_price<20
+    # print(one,two,three,four)
+    if one and two and three and four:
+        return df['ts_code'][0]
+
+def m3_steady_break_down_stg(df,days = 8):
+
+
+
+    ma_m3 = df["ma_m3"][-days:]
+    close = df["close"][-days:]
+    one = ma_m3.std() < 0.05
+    nums_close_gt_mam3 = sum(map(lambda x,y:x<y ,ma_m3,close))
+    # print(ma_m3.std(),df['ts_code'][0])
+    three = nums_close_gt_mam3 >= days-3
+    two = df['low'][-1] < df['ma_m3'][-1]
+    if one and three and two:
+        return df['ts_code'][0]
+
+def macd_zerozeroone_stg(df,timestamp,days = 6):
     "macd 一直是绿色0连续，然后"
     df1 = select_df_by_timestamp(df.copy(),timestamp,days)
 
@@ -201,7 +266,7 @@ def macd_zerozeroone_strategy(df,timestamp,days = 6):
         return df['ts_code'][0]
     return None
 
-def continual_gre_up_strategy(df,timestamp,days = 4):
+def continual_gre_up_stg(df,timestamp,days = 4):
     df = select_df_by_timestamp(df,timestamp,days)
     if df.empty:
         return None
@@ -215,7 +280,7 @@ def continual_gre_up_strategy(df,timestamp,days = 4):
     return None
 
 
-def three_line_up_strategy(df,timestamp,days = 8):
+def three_line_up_stg(df,timestamp,days = 8):
     df = select_df_by_timestamp(df,timestamp,days)
     one = three_lines_up(df)
     # two = all(map(lambda x:x>0,df['macd'][-8:-1]))
@@ -227,7 +292,7 @@ def three_line_up_strategy(df,timestamp,days = 8):
         return df['ts_code'][0]
     return None
 
-def reds_no_raise_strategy(df,timestamp,days = 6):
+def reds_no_raise_stg(df,timestamp,days = 6):
 
     df_old = df.copy()
     df = select_df_by_timestamp(df,timestamp,days)
@@ -256,7 +321,7 @@ def reds_no_raise_strategy(df,timestamp,days = 6):
         return df.ts_code[0]
     return None
 
-def fake_2reds_strategy(df,timestamp):
+def fake_2reds_stg(df,timestamp):
     if df.empty:
         return None
 
@@ -272,7 +337,7 @@ def fake_2reds_strategy(df,timestamp):
     return None
 
 
-def macd_120_strategy(df ,timestamp,days = 4,default = "macd_120"):
+def macd_120_stg(df ,timestamp,days = 4,default = "macd_120"):
 
     df = select_df_by_timestamp(df,timestamp,days)
     macd = df[default]
@@ -286,7 +351,7 @@ def macd_120_strategy(df ,timestamp,days = 4,default = "macd_120"):
         return df.ts_code[0]
     return None
 
-def jump_open_strategy(df,timestamp):
+def jump_open_stg(df,timestamp):
     df = select_df_by_timestamp(df,timestamp,days= 11)
 
 
@@ -335,7 +400,7 @@ def down_to_m3(df,timestamp,days = 6):
     """undone"""
 
 
-def macd_strategy(df ,timestamp,days = 10,default = "macd"):
+def macd_stg(df ,timestamp,days = 10,default = "macd"):
 
     df = select_df_by_timestamp(df,timestamp,days)
     macd = df[default]
@@ -352,7 +417,7 @@ def macd_strategy(df ,timestamp,days = 10,default = "macd"):
         return df.ts_code[0]
     return None
 
-def long_head_strategy(df,timestamp,days = 12):
+def long_head_stg(df,timestamp,days = 12):
     df = select_df_by_timestamp(df,timestamp,days)
     if df.empty:
         return None
@@ -370,7 +435,7 @@ def long_head_strategy(df,timestamp,days = 12):
 
 
 
-def kdj_strategy(df,timestamp,days= 12):
+def kdj_stg(df,timestamp,days= 12):
     df = select_df_by_timestamp(df,timestamp,days)
     if df.empty:
         return None

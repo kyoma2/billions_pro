@@ -1,6 +1,51 @@
-
 import pandas as pd
+from conn.invate import recent_df_cache,recent_df_updated
+class Mask_helper:
+    """对于masqurade 因为这个是用当天的指标，现在想拓展他可以用到其他天的数据,针对特定的指标 做的一个装饰器，这样子就不用每个股票df
+    都去添加指标，节省了很多时间
+    """
+    def __init__(self,fiels_needs = None):
+        if not fiels_needs:
+            return
+        if not isinstance(fiels_needs,(tuple,list)):
+            fiels_needs = [fiels_needs]
 
+        self.indicator_meths = {}
+        for i in fiels_needs:
+            self.indicator_meths[i] = getattr(self,i)
+
+    def last_close(self,df):
+        """这个东东是自己扩展的 想要什么自己加"""
+        df = df.copy()
+        df['last_close'] = df['close'].shift(1)
+        return df
+
+    def masque_add_decorator(self,func):
+        def wrapper(*args,**kwargs):
+            return func(*args,**kwargs)
+        setattr(wrapper,'cus_fields_flag',1)
+        setattr(wrapper,'indicator_meths',self.indicator_meths)
+
+        return wrapper
+
+    def __call__(self,func):
+        """just decorator"""
+        return self.masque_add_decorator(func)
+
+    def masque_detector(self,df,action_tup_li):
+        # 在这一步的masquerade 新增指标
+
+        for action_tup in action_tup_li:
+            if not isinstance(action_tup, (tuple, list)):
+                action_tup = [action_tup]
+            for action in action_tup:
+                if hasattr(action,"indicator_meths"):
+                    indicator_meths = getattr(action,"indicator_meths")
+                    # print(1111,indicator_meths)
+                    for meths in indicator_meths.values():
+                        df = meths(df)
+
+        return df
 
 
 
@@ -27,6 +72,9 @@ def __two_are_close(indicator1,indicator2,tolerance = 1):
 
 
 def masquerade(df,action_tup_li):
+
+    df = Mask_helper().masque_detector(df,action_tup_li)
+
     # print(df)
     """ action_tup: [前天,昨天，今天]"""
     df_length = len(df)
@@ -74,9 +122,9 @@ def crossing_star(increase_per=(0, 0),color = "any",leglen = 3, bodylen = 0, sha
         if shape == "any":
             seven = True
         elif shape == "up":
-            seven = up_size > down_size*2.5
+            seven = up_size > down_size*1
         elif shape == "down":
-            seven = up_size*2.5 < down_size
+            seven = up_size*1 < down_size
 
 
         return one and two and three and five and four and six and seven
@@ -111,6 +159,17 @@ def closes(indictor1= "low",indictor2 = "ma_m1",tolerance = 1):
     def wraper(row):
         row = row.copy()
         return __two_are_close(row[indictor1], row[indictor2], tolerance=tolerance)
+    return wraper
+
+
+def field_pct_chg(indictor= "high",percent = 0):
+    @Mask_helper("last_close")
+    def wraper(row):
+        row = row.copy()
+        # print(row['high'])
+        # print(row['last_close'])
+        # print((row[indictor]-row['last_close'])/row['last_close']*100)
+        return (row[indictor]-row['last_close'])/row['last_close']*100 > percent
     return wraper
 
 def tail_break_ma(on = ('ma_m2',"ma_m3")):
@@ -180,7 +239,7 @@ def common(increase_per = (0,0),jump = (0,0),red = "any"):
         row = row.copy()
         one = increase_per[0] <= row['pct_chg'] <= increase_per[1] if increase_per != (0,0) else True
         two = jump[0] <= row['jump_open'] <= jump[1] if jump != (0,0) else True
-        three = (row['open'] < row['close']) == red  if  red != "any" else True
+        three = (row['open'] <= row['close']) == red  if  red != "any" else True
         # print(one,two,three)
         return one and two and three
     return wraper
@@ -202,3 +261,8 @@ def net_moneyflow_r(percent = 0):
         return one
 
     return wraper
+
+
+if __name__ == '__main__':
+    a = field_pct_chg()
+    print(a)

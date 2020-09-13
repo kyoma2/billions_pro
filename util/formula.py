@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
@@ -340,4 +339,3 @@ def ema(data, n=12, val_name="close"):
             EMA.append(today_ema)
 
     return np.asarray(EMA)
-

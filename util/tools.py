@@ -1,4 +1,3 @@
-
 import sys
 import datetime
 import pandas as pd
@@ -217,13 +216,6 @@ def is_m1_steady(df):
 
     return all(map(lambda x,y: abs(x-y)/y<0.06 ,df['close'],df['end_ave'])) and df['ma_m1'].std()< 0.35 and df.iloc[-1]['close']/end_ave < 1.06
 
-def is_ma_steady(df,ma):
-    df = df.copy()
-    end_ave = df[ma].mean()
-    df['ma_ave'] = end_ave
-    # print(all(map(lambda x,y: abs(x-y)/y<0.06 ,df[ma],df['ma_ave'])) ,(df[ma].std()< 0.3))
-    return all(map(lambda x,y: abs(x-y)/y<0.05 ,df[ma],df['ma_ave'])) and (df[ma].std()< 0.3)
-
 def tail_is_increasing(li,tail_length = 3,ascending = False):
     """li 数组 持续增长"""
     li = li[- tail_length:]
@@ -238,7 +230,6 @@ def tail_is_increasing(li,tail_length = 3,ascending = False):
         li.reverse()
     li2 = li[1:]+ [li[-1]]
 
-    # print(all(map(lambda x,y: y >= x, li, li2)))
     return all(map(lambda x,y: y >= x, li, li2))
 
 def tomorrow_col_adder(df):

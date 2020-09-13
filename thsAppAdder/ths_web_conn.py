@@ -11,7 +11,7 @@ class ths_queapi:
 
     def __init__(self):
         self.cur_timestp = datetime.datetime.now().strftime("%Y-%m-%d")
-        self.common = ",非新股,非st,股价小于30"
+        self.common = ",非新股,非st,股价小于30,"
         self.trade_days = self.get_trade_days()
         self.td,self.ysd,self.two_dl,*rest = self.trade_days
 
@@ -34,38 +34,72 @@ class ths_queapi:
 
 
 
-    def tail_fall_but_money_in(self,timestamp,verbose=False):
+    def tail_fall_but_money_in(self,timestamp,verbose=False,todayisfu= True):
         """每个小时区间跌幅但是资金流入,这种情况用于判断最后几天的洗盘"""
+
         td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,*rest = self.set_review_date(timestamp)
+        today_requests = ""
+        if todayisfu:
+            fu,td, ysd, two_dl, d_3, d_4, d_5, d_6, d_7, d_8, *rest = self.set_review_date(timestamp)
+            today_requests = f"{fu}高开大于1"
+
         res1 = f"{td}14点到15点跌幅大于1.5，" \
                f"({td}15点dde大单净额-{td}14点dde大单净额)>0," \
-               f"({td}15点dde大单净额-{td}14点30分dde大单净额)>0," \
                f"{td}15点dde大单净额>0,{td}涨幅小于3," \
                f"{d_6}至{td}每天涨跌幅小于8," \
                f"{d_7}至{td}的区间涨跌幅>5%且{d_7}至{td}的区间涨跌幅<20%," \
                f"{td}涨幅小于3," \
+               f"{td}最高价等于{self.set_review_date(timestamp)[20]}至{td}最高价" \
 
 
-        res1= res1 + self.common
+        res1= res1 + self.common + today_requests
         if verbose:
             print(res1)
         return res1
 
-    def mid_fall_but_money_in(self,timestamp,verbose=False):
+    def quoter_fall_but_money_in(self,timestamp,verbose=False,todayisfu =True):
         """每个小时区间跌幅但是资金流入,这种情况用于判断最后几天的洗盘"""
+
         td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,*rest = self.set_review_date(timestamp)
+        today_requests = ""
+        if todayisfu:
+            fu,td, ysd, two_dl, d_3, d_4, d_5, d_6, d_7, d_8, *rest = self.set_review_date(timestamp)
+            today_requests = f"{fu}高开大于1"
+        res1 = f"{td}10点30到11点30跌幅大于1.5，" \
+               f"({td}11点30dde大单净额-{td}10点30dde大单净额)>0," \
+               f"{td}15点dde大单净额>0,{td}涨幅小于3," \
+               f"{d_6}至{td}每天涨跌幅小于8," \
+               f"{d_7}至{td}的区间涨跌幅>5%且{d_7}至{td}的区间涨跌幅<20%," \
+               f"{td}最高价等于{self.set_review_date(timestamp)[20]}至{td}最高价" \
+
+
+        res1= res1 + self.common +today_requests
+        if verbose:
+            print(res1)
+        return res1
+
+
+    def mid_fall_but_money_in(self,timestamp,verbose=False,todayisfu=True):
+        """每个小时区间跌幅但是资金流入,这种情况用于判断最后几天的洗盘"""
+
+
+        td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,*rest = self.set_review_date(timestamp)
+        today_requests = ""
+        if todayisfu:
+            fu,td, ysd, two_dl, d_3, d_4, d_5, d_6, d_7, d_8, *rest = self.set_review_date(timestamp)
+            today_requests = f"{fu}高开大于1"
+
         res1 = f"{td}13点到14点跌幅大于1.5，" \
                f"({td}14点dde大单净额-{td}13点dde大单净额)>0," \
                f"{td}15点dde大单净额>0,{td}涨幅小于3," \
                f"{d_7}至{td}的区间涨跌幅>5%且{d_7}至{td}的区间涨跌幅<20%," \
-               f"{td}涨幅小于3"
+               f"{td}涨幅小于3," \
+               f"{td}最高价等于{self.set_review_date(timestamp)[20]}至{td}最高价"
 
-        res1 = res1 + self.common
+        res1 = res1 + self.common + today_requests
         if verbose:
             print(res1)
         return res1
-
-
 
     def big_suck_not_leave(self,timestamp,verbose=False):
         """资金流入，成交量暴增，不能涨停，次日的成交量放缓，资金继续少量流入"""
@@ -141,6 +175,24 @@ class ths_queapi:
             print(res1)
         return res1
 
+    def upper_shadow_line(self,timestamp = None,verbose =False,todayisfu=False):
+        td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,*rest = self.set_review_date(timestamp)
+        today_requests = ""
+        if todayisfu:
+            fu,td, ysd, two_dl, d_3, d_4, d_5, d_6, d_7, d_8, *rest = self.set_review_date(timestamp)
+            today_requests = f"{fu}高开大于1"
+        """找下影线的"""
+        res1 = f"{two_dl}收盘价/开盘价小于1.05，" \
+               f"{d_8}至{two_dl}涨跌幅小于5，" \
+               f"{two_dl}开盘价/最低价>1.03，" \
+               f"{two_dl}收盘价/开盘价大于1.01，" \
+               f"{two_dl}最高价/收盘价<1.02，" \
+               f"{ysd}涨幅大于0"
+
+        if verbose:
+            print(res1)
+        return res1
+
     def five_reds_under_m20(self,timestamp = None,verbose =False):
         td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,d_9,d_10,*rest = self.set_review_date(timestamp)
 
@@ -174,29 +226,6 @@ class ths_queapi:
             print(res1)
         return res1
 
-    def a_little_minus_macd(self,timestamp = None,verbose =False):
-        td, ysd, two_dl, d_3, d_4, d_5, d_6, d_7, d_8, d_9, d_10, *rest = self.set_review_date(timestamp)
-        res1 = \
-            f"{d_4}至{td}有>=3次的macd小于0，" \
-            f"{d_4}macd大于0，" \
-            f"{td}macd大于0，" \
-            f"{two_dl}kdjj值大于0，"
-
-        if verbose:
-            print(res1)
-        return res1
-
-    def two_up_line(self,timestamp = None,verbose =False):
-        td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,d_9,d_10,*rest = self.set_review_date(timestamp)
-        """找上影线的"""
-        res1 = f"1.01<{td}收盘价/开盘价<1.03," \
-            f"{td}最高价/收盘价>1.04," \
-            f"1.01<{ysd}收盘价/开盘价<1.03," \
-            f"{ysd}最高价/收盘价>1.05," \
-
-        if verbose:
-            print(res1)
-        return res1
 
 
 
@@ -220,27 +249,26 @@ class ths_queapi:
         return tscode
 
 
-    def ss(self,td,verbose = 0):
+    def ss(self,td,verbose = 0,**kwargs):
 
         stg = [
-                self.a_little_minus_macd,
-                self.two_up_line,
-                self.tail_fall_but_money_in,
-                self.mid_fall_but_money_in,
-                self.onefake_of_threereds,
-                self.jump_fall_suck,
-                self.lower_shadow_line,
-                self.five_reds_under_m20,
-                self.onefake_red_after_twored
 
-
+                # self.onefake_of_threereds,
+                # self.jump_fall_suck,
+                # self.lower_shadow_line,
+                # self.five_reds_under_m20,
+                # self.onefake_red_after_twored,
+                # self.quoter_fall_but_money_in,
+                # self.mid_fall_but_money_in,
+                # self.tail_fall_but_money_in
+                self.upper_shadow_line
                ]
 
 
 
         res = {}
         for i in stg:
-            outcome = self.requests_selenium(i(td,verbose))
+            outcome = self.requests_selenium(i(td,verbose,**kwargs))
             if outcome==[]:
                 continue
             res[i.__name__] = outcome
@@ -276,28 +304,30 @@ class ths_queapi:
         df.to_excel("..\check_report\\ths{}.xlsx".format(td))
         # print(df)
 
-        print("-"*10,td,"-"*10,'\n')
+        print("-"*10,td,"-"*10)
         for col in df.columns:
             part_df = df.loc[df[col]==1,'score']
             if not part_df.empty:
                 print(col,f":{(20-len(col))*' '} num {str(part_df.count())} score {str(part_df.mean())}")
+        if df.empty:
+            print("have no result",'\n')
 
 
 
-
-    def lots_of_work(self,timestamp,days = 100,verbose = 0):
+    def lots_of_work(self,timestamp,days = 100,verbose = 0,**kwargs):
         if timestamp not in self.trade_days:
             self.trade_days = [timestamp] + self.trade_days
         trade_days = self.set_review_date(timestamp)[:days]
         for tmstamp in trade_days:
             # print(tmstamp)
-            self.ss(tmstamp,verbose=verbose)
+            self.ss(tmstamp,verbose=verbose,**kwargs)
 
 
 
 a = ths_queapi()
 
-a.lots_of_work("9月10日",verbose=1)
+# a.lots_of_work("9月10日",verbose=1,todayisfu = 0)
+a.lots_of_work("9月10日",verbose=1,todayisfu = 0)
 # a.lots_of_work("7月25日")
 # a.ss("6月11日")
 # driver = Chrome()
