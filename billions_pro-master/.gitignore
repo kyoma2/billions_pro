@@ -1,0 +1,8 @@
+*.log
+*.pyc
+*.idea
+test.py
+white.py
+/check_report
+/good_emp
+/test_dir

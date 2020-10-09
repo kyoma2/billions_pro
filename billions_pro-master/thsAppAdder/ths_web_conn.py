@@ -34,7 +34,7 @@ class ths_queapi:
 
 
 
-    def tail_fall_but_money_in(self,timestamp,verbose=False,todayisfu= True):
+    def tail_fall_but_money_in(self,timestamp,verbose=False,todayisfu= False):
         """每个小时区间跌幅但是资金流入,这种情况用于判断最后几天的洗盘"""
 
         td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,*rest = self.set_review_date(timestamp)
@@ -57,7 +57,7 @@ class ths_queapi:
             print(res1)
         return res1
 
-    def quoter_fall_but_money_in(self,timestamp,verbose=False,todayisfu =True):
+    def quoter_fall_but_money_in(self,timestamp,verbose=False,todayisfu =False):
         """每个小时区间跌幅但是资金流入,这种情况用于判断最后几天的洗盘"""
 
         td,ysd,two_dl,d_3,d_4,d_5,d_6,d_7,d_8,*rest = self.set_review_date(timestamp)
@@ -79,7 +79,7 @@ class ths_queapi:
         return res1
 
 
-    def mid_fall_but_money_in(self,timestamp,verbose=False,todayisfu=True):
+    def mid_fall_but_money_in(self,timestamp,verbose=False,todayisfu=False):
         """每个小时区间跌幅但是资金流入,这种情况用于判断最后几天的洗盘"""
 
 
@@ -227,6 +227,8 @@ class ths_queapi:
         return res1
 
 
+
+
     def requests_selenium(self,query):
         """chromedrive """
         options = webdriver.ChromeOptions()
@@ -350,8 +352,8 @@ class ths_queapi:
 
 a = ths_queapi()
 
-a.lots_of_work("9月28日",verbose=1)
-
+"""近10日有大于2次假阳线，近10日有大于2次高开大于0，近10日有大于5个阳线，大于20日线"""
+a.lots_of_work("9月11日",verbose=1)
 # a.lots_of_work("7月25日")
 # a.ss("6月11日")
 # driver = Chrome()
