@@ -192,7 +192,7 @@ class ths_queapi:
         res1 = f"1.01<{td}收盘价/开盘价<1.03," \
             f"{td}最高价/收盘价>1.04," \
             f"1.01<{ysd}收盘价/开盘价<1.03," \
-            f"{ysd}最高价/收盘价>1.05," \
+            f"{ysd}最高价/收盘价>1.03," \
 
         if verbose:
             print(res1)
@@ -297,7 +297,7 @@ class ths_queapi:
 
 a = ths_queapi()
 
-a.lots_of_work("9月10日",verbose=1)
+a.lots_of_work("9月28日",verbose=1)
 # a.lots_of_work("7月25日")
 # a.ss("6月11日")
 # driver = Chrome()

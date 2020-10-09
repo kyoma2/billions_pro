@@ -215,37 +215,37 @@ class billions_pro:
                 pass
         class strategy_setter:
 
-            # kongzhongjiayou = kongzhongjiayou_strategy(df)
+            kongzhongjiayou = kongzhongjiayou_strategy(df)
             gre_leg = masquerade(df,[
                                      crossing_star(bodylen=0.5,leglen=2,color="gre",increase_per=(-10,-0.5)),
 
 
             ])
-            # ma3_chase_ma2 = ma3_chase_ma2(df,self.cur_timestp)
-            # #
-            # quick_up_down_greleg = quick_up_down_greleg_strategy(df)
-            # quick_up_down = quick_up_down_strategy(df)
-            # tail_break_ma = masquerade(df,[ *[four_line_follow()]*3
-            #                 ,tail_break_ma(on="ma_m3")
-            #                     ])
+            ma3_chase_ma2 = ma3_chase_ma2(df,self.cur_timestp)
             #
-            # two_upper_shadow = masquerade(df,[
-            #                 crossing_star(bodylen=0.2, leglen=2, color="red", increase_per=(-3, 3),shape="up"),
-            #                 crossing_star(bodylen=0.2, leglen=2, color="red", increase_per=(-3, 3),shape="up"),
-            #                     ])
-            # break_m3 = break_m3_strategy(df, self.cur_timestp)
-            # macd = macd_strategy(df,self.cur_timestp)
+            quick_up_down_greleg = quick_up_down_greleg_strategy(df)
+            quick_up_down = quick_up_down_strategy(df)
+            tail_break_ma = masquerade(df,[ *[four_line_follow()]*3
+                            ,tail_break_ma(on="ma_m3")
+                                ])
+
+            two_upper_shadow = masquerade(df,[
+                            crossing_star(bodylen=0.2, leglen=2, color="red", increase_per=(-3, 3),shape="up"),
+                            crossing_star(bodylen=0.2, leglen=2, color="red", increase_per=(-3, 3),shape="up"),
+                                ])
+            break_m3 = break_m3_strategy(df, self.cur_timestp)
+            macd = macd_strategy(df,self.cur_timestp)
+
+            kdj = kdj_strategy(df,self.cur_timestp)
+            money_flow = net_moneyflow(df,self.cur_timestp)
+            three_lines_up = three_line_up_strategy(df,self.cur_timestp)
+            macd_zerozeroone = macd_zerozeroone_strategy(df,self.cur_timestp)
             #
-            # kdj = kdj_strategy(df,self.cur_timestp)
-            # money_flow = net_moneyflow(df,self.cur_timestp)
-            # three_lines_up = three_line_up_strategy(df,self.cur_timestp)
-            # macd_zerozeroone = macd_zerozeroone_strategy(df,self.cur_timestp)
-            # #
-            # long_header = masquerade(df,[four_line_follow(),
-            #                              *[common()]*3,
-            #                              (long_head(),closes())
-            #                         ])
-            # reds_no_raise = reds_no_raise_strategy(df, self.cur_timestp)
+            long_header = masquerade(df,[four_line_follow(),
+                                         *[common()]*3,
+                                         (long_head(),closes())
+                                    ])
+            reds_no_raise = reds_no_raise_strategy(df, self.cur_timestp)
 
 
         self.combine_res([(strategy_setter.__dict__[i],i) if i  not in a.__dict__  else (None,"") for i in strategy_setter.__dict__])
