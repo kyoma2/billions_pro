@@ -83,8 +83,7 @@ def _kongzhongjianyou(df,days = 4):
 
     res = masquerade(df, [*[common(increase_per=(-3, 3))] * 2,
                     common(jump=(1.5, 11), red=True,increase_per=(3,11)),
-                    *[common(increase_per=(-4, 4))]*(days-2),
-                    (common(increase_per=(-4, 4)),net_moneyflow_r(0.1))
+                    *[common(increase_per=(-4, 4))]*(days-2)
                     ])
 
     # print(days,cul_chg_steady,ma_m1_steady,res)
@@ -100,6 +99,25 @@ def kongzhongjiayou_stg(df):
         return df['ts_code'][0]
     return None
 
+
+def weekly_steady_stg(df):
+    week_df = PeriodDfConver.get(df,'W')
+
+
+    # 有8周大于20日线
+    days = 10
+    one = sum(map(lambda close,m3: close>=m3,week_df['close'][-days:],week_df['ma_m3'][-days:])) >=8
+
+    two = sum(map(lambda m1,m3: m1>=m3,week_df['ma_m1'][-days:],week_df['ma_m3'][-days:])) >=8
+
+    three = sum(map(lambda close,m3: close/m3 < 1.1 ,week_df['close'][-days:],week_df['ma_m3'][-days:])) >=8
+
+    four  = is_ma_steady(week_df,line="ma_m3")
+
+    five = week_df[-1]['ma_m1'] > week_df[-1]['ma_m2'] and week_df[-1]['ma_m3'] > week_df[-1]['ma_m4']
+
+    if one and two and three and four and five:
+        return df['ts_code'][0]
 
 def last_clean_stg(df):
     if df.empty:

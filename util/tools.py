@@ -1,6 +1,7 @@
 import sys
 import datetime
 import pandas as pd
+from util.formula import MA
 
 class deco:
     @staticmethod
@@ -209,12 +210,12 @@ def is_first_top(df,timestamp,days= 7):
 
     return first_day_max / df_2['high'].max() > 0.95
 
-def is_m1_steady(df):
+def is_ma_steady(df,line = "ma_m1"):
     df = df.copy()
     end_ave = df['close'].mean()
     df['end_ave'] = end_ave
 
-    return all(map(lambda x,y: abs(x-y)/y<0.06 ,df['close'],df['end_ave'])) and df['ma_m1'].std()< 0.35 and df.iloc[-1]['close']/end_ave < 1.06
+    return all(map(lambda x,y: abs(x-y)/y<0.06 ,df['close'],df['end_ave'])) and df[line].std()< 0.35 and df.iloc[-1]['close']/end_ave < 1.06
 
 def tail_is_increasing(li,tail_length = 3,ascending = False):
     """li 数组 持续增长"""
@@ -278,3 +279,37 @@ def today_amount(df):
 def today_volratio(df):
     # print(df.columns)
     return df.iloc[-1]['volume_ratio']
+
+
+class PeriodDfConver:
+    cache = {}
+
+    @staticmethod
+    def get(df,period):
+
+        key = (df['ts_code'][0],period)
+        if key in PeriodDfConver.cache.keys():
+            return PeriodDfConver.cache[key]
+        else:
+            transedDf = PeriodDfConver.transToPeriodDf(df,period)
+            PeriodDfConver.cache[key] = transedDf
+            return transedDf
+
+    @staticmethod
+    def transToPeriodDf(df,period):
+        period_df = df.resample(period).last()
+        # 周线的change等于那一周中每日change的连续相乘
+        period_df = period_df[['date']]
+        period_df['pct_chg'] = df['pct_chg'].resample(period).apply(lambda x: (x + 1.0).prod() - 1.0)
+        period_df['close'] = df['close'].resample(period).last()
+        period_df['open'] = df['open'].resample(period).first()
+        period_df['high'] = df['high'].resample(period).max()
+        period_df['low'] = df['low'].resample(period).min()
+        period_df['vol'] = df['vol'].resample(period).sum()
+
+        period_df['ma_m1'] = MA(period_df,5)
+        period_df['ma_m2'] = MA(period_df, 10)
+        period_df['ma_m3'] = MA(period_df, 20)
+        period_df['ma_m4'] = MA(period_df, 30)
+
+        return period_df

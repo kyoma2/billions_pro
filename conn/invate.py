@@ -58,7 +58,7 @@ def get_trade_days(n,timestamp = ""):
     return sy1
 
 
-def get_all_recent(days = 120,work_n= 15,money_flow = False,read_hdf = True, path = "no_local"):
+def get_all_recent(days = 200,work_n= 15,money_flow = False,read_hdf = True, path = "no_local"):
     """
     :parameter days int  default 120days
     :parameter work_n number of threading_process
@@ -216,7 +216,7 @@ class processbar:
 
 
 
-def days_oneprep_data(ts_code,time_stamp ="",days = 121):
+def days_oneprep_data(ts_code,time_stamp ="",days = 200):
 
     """利用最近几天的所有股票数据然后合并,对每个股票都做处理后 才能返回 return get各个股票信息"""
     if time_stamp:
@@ -316,7 +316,7 @@ def _allprep_data_storage(days = 120, update = 1,parrallel = True):
         dfs = []
 
         if parrallel:
-            dfs = _add_indicator_parrallel(alldf,worker_n=6)
+            dfs = _add_indicator_parrallel(alldf,worker_n=3)
         elif not parrallel:
             dfs = []
             for k, ts_code in enumerate(alldf['ts_code'].unique()):
@@ -337,7 +337,7 @@ def _allprep_data_storage(days = 120, update = 1,parrallel = True):
         r_df.to_hdf("..\hdf_storage\data_prepared.h5",key="df",mode = "w",format = "fixed")
     return r_df
 
-def _add_indicator_parrallel(alldf,worker_n = 6):
+def _add_indicator_parrallel(alldf,worker_n = 3):
     """对股票总表 添加新的指标进行计算 返回成 [df1,df2] 单个股票的列表"""
     def indictor_prepared_parallel_func(k, sk_df):
         if k % 100 == 0:
@@ -416,7 +416,7 @@ def days_allprep_data(ts_code,time_stamp ="",days = 121,parallel = True,**kwargs
     return df
 
 
-def _insert_cache_parallel(alldf,worker_n = 6):
+def _insert_cache_parallel(alldf,worker_n = 3):
     """多进程 遍历总股票表 然后分别{代码：股票df} 插入缓存字典recent_df_cache"""
     def df_slice_parallel_func(alldf, slice_position,max_slice, parrel_slice="read_the_docs"):
 
@@ -585,9 +585,21 @@ def load_ttl_vol():
 
 
 
+
+
 def get_all_skname():
     return  get_df_three_times(pro.query)('stock_basic', exchange='', list_status='L', fields='ts_code')['ts_code'].tolist()
 
 if __name__ == '__main__':
-    df = moneyflow_onedays_df(trade_date = "20200722",tscode = "600012.SH")
-    print(df)
+    df = get_ts_data("002360.SZ")
+    # print(df['ma_m4'])
+    #
+    # df = PeriodDfConver.get(df,'W')
+    # print(df['close'][-90:].mean())
+    # print(df)
+    # df = pd.DataFrame()
+    # period_type = 'W'
+    #
+    # period_df = df.resample(period_type,how='last')
+    # period_df['最高'] = df['high'].resample(period_type).max()
+    # print(period_df)

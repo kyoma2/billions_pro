@@ -1,8 +1,8 @@
-
 from tushare.stock.indictor import kdj
 import tushare as ts
 from thsAppAdder.unname import ths_api
 from util.tools import *
+
 from strategy.stghunter import *
 from masquerade.rader import *
 from conn.invate import *
@@ -10,10 +10,10 @@ from logger import logman
 import time,conn
 import traceback
 from good_emp import good_emp
-from functools import partial
 
 
-class billions_pro:
+
+class BillionsPro:
     def __init__(self):
         """:param self.result {'function_name':"ts_code"}"""
 
@@ -55,7 +55,7 @@ class billions_pro:
     def combine_res(self,tuple_res):
         """apply in func <billions_work>,combine the each stock result
         :param tuple_res :list of tuple eg ("600012.SH",'reds_no_raise') or (None,'reds_no_raise')
-        :return :dic eg{'300585.SZ': ['break_m3_strategy', 'tail_break_ma']}"""
+        :return :dic eg{'300585.SZ': ['break_m3_stg', 'tail_break_ma']}"""
         for tuple_one in tuple_res:
             if tuple_one[0]:
                 key = tuple(tuple_one)[0] ; val = tuple(tuple_one)[1]
@@ -193,10 +193,11 @@ class billions_pro:
         return df
 
     def steam_line(self,ts_code, model = "quick",**kwargs):
-        # print(ts_code)
+
         get_df_data = self.get_date_model(model=model)
         df = get_df_data(ts_code, self.cur_timestp)
-        # print(df)
+
+
         if df.empty:
             return
         # df = pd.merge(df,self.ttl_vol,on=['ts_code'],how='left')
@@ -215,16 +216,16 @@ class billions_pro:
                 pass
         class strategy_setter:
 
-            kongzhongjiayou = kongzhongjiayou_strategy(df)
+            kongzhongjiayou = kongzhongjiayou_stg(df)
             gre_leg = masquerade(df,[
                                      crossing_star(bodylen=0.5,leglen=2,color="gre",increase_per=(-10,-0.5)),
 
 
             ])
-            ma3_chase_ma2 = ma3_chase_ma2(df,self.cur_timestp)
+            # ma3_chase_ma2 = ma3_chase_ma2(df,self.cur_timestp)
             #
-            quick_up_down_greleg = quick_up_down_greleg_strategy(df)
-            quick_up_down = quick_up_down_strategy(df)
+            quick_up_down_greleg = quick_up_down_greleg_stg(df)
+            quick_up_down = quick_up_down_stg(df)
             tail_break_ma = masquerade(df,[ *[four_line_follow()]*3
                             ,tail_break_ma(on="ma_m3")
                                 ])
@@ -233,33 +234,33 @@ class billions_pro:
                             crossing_star(bodylen=0.2, leglen=2, color="red", increase_per=(-3, 3),shape="up"),
                             crossing_star(bodylen=0.2, leglen=2, color="red", increase_per=(-3, 3),shape="up"),
                                 ])
-            break_m3 = break_m3_strategy(df, self.cur_timestp)
-            macd = macd_strategy(df,self.cur_timestp)
+            break_m3 = break_m3_stg(df, self.cur_timestp)
+            macd = macd_stg(df,self.cur_timestp)
 
-            kdj = kdj_strategy(df,self.cur_timestp)
-            money_flow = net_moneyflow(df,self.cur_timestp)
-            three_lines_up = three_line_up_strategy(df,self.cur_timestp)
-            macd_zerozeroone = macd_zerozeroone_strategy(df,self.cur_timestp)
+            kdj = kdj_stg(df,self.cur_timestp)
+
+            three_lines_up = three_line_up_stg(df,self.cur_timestp)
+            macd_zerozeroone = macd_zerozeroone_stg(df,self.cur_timestp)
             #
             long_header = masquerade(df,[four_line_follow(),
                                          *[common()]*3,
                                          (long_head(),closes())
                                     ])
-            reds_no_raise = reds_no_raise_strategy(df, self.cur_timestp)
+            reds_no_raise = reds_no_raise_stg(df, self.cur_timestp)
 
 
         self.combine_res([(strategy_setter.__dict__[i],i) if i  not in a.__dict__  else (None,"") for i in strategy_setter.__dict__])
 
 
 if __name__ == '__main__':
-    bp = billions_pro()
+    bp = BillionsPro()
     # df= bp.get_date_model("")("600012.SH")
     # print(df.columns)
     # bp.de_bug("000713.SZ")
-    bp.de_bug("002548.SZ")
+    # bp.de_bug("600012.SH",model="one")
     # bp.de_bug("300575.SZ")
     # bp.de_bug("002644.SZ",timestamp="2020-04-17")
-    # bp.billians_work(model="prepared",res2xlsx=True)
+    bp.billians_work(model="prepared",res2xlsx=True)
     # bp.billians_work(model="prepared",res2xlsx=True,timestampt="2020-04-20")
     # bp.lots_timestp_check(days=3)
 
@@ -270,7 +271,7 @@ if __name__ == '__main__':
 
 
         # print(i)
-    bp.lots_timestp_check(days=20)
+    # bp.lots_timestp_check(days=20)
     # def getLastWeekDay():
     #     datetime.datetime.now() - datetime.timedelta(days=1)
     #     return lastWorkDay
